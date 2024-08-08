@@ -16,7 +16,7 @@ O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anoma
 
 ### Figura 1: Exemplo de Anomalia de Temperatura Mínima Mensal
 
-![Anomalia de Tempratura Mínima Mensal](Figuras/Acum_PRP_Mai_2024.png)
+![Anomalia de Tempratura Mínima Mensal](Figuras/anomalia_temperatura_minima_jun.png)
 
 ### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
 
