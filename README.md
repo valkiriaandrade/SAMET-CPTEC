@@ -24,7 +24,7 @@ O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anoma
 
 ### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
 
-![Anomalia de Tempratura Mínima Mensal - Sul](Figuras/climatologia_PRP_outubro.png)
+![Anomalia de Tempratura Mínima Mensal - Sul](Figuras/anomalia_temperatura_minima_jun.png)
 
 ## Como Utilizar
 
