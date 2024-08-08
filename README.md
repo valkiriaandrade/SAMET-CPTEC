@@ -1,10 +1,10 @@
 # SAMET-CPTEC
 
-Este repositório contém scripts para a visualização dos dados de precipitação do produto SAMET do INPE/CPTEC. O produto SAMET combina observações de precipitação de várias fontes, como satélites e pluviômetros, para criar um conjunto de dados de alta resolução espacial e temporal.
+Este repositório contém scripts para a visualização dos dados de precipitação do produto SAMET do INPE/CPTEC. Este produto combina os dados observados com a reanálise ERA5, fazendo uma correção do campo de temperatura usando uma taxa de lapso estimada.
 
 ## Descrição
 
-O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de precipitação utilizando o produto SAMET do CPTEC/INPE. 
+O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anomalia de temperatura utilizando o produto SAMET do CPTEC/INPE. 
 
 ## Estrutura do Repositório
 
@@ -14,17 +14,17 @@ O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de preci
 
 ## Imagens
 
-### Figura 1: Exemplo de Precipitação Acumulada Mensal
+### Figura 1: Exemplo de Anomalia de Temperatura Mínima Mensal
 
-![Precipitação Acumulada mensal](Figuras/Acum_PRP_Mai_2024.png)
+![Anomalia de Tempratura Mínima Mensal](Figuras/Acum_PRP_Mai_2024.png)
 
-### Figura 2: Exemplo de Precipitação Acumulada Mensal - Região Norte
+### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
 
-![Precipitação scumulada mensal - norte](Figuras/Acum_PRP_Jul_2024_Norte.png)
+![Anomalia de Tempratura Máxima Mensal](Figuras/Acum_PRP_Jul_2024_Norte.png)
 
-### Figura 3: Exemplo de Climatologia - Outubro
+### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
 
-![Climatologia](Figuras/climatologia_PRP_outubro.png)
+![Anomalia de Tempratura Mínima Mensal - Sul](Figuras/climatologia_PRP_outubro.png)
 
 ## Como Utilizar
 
