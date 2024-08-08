@@ -20,7 +20,7 @@ O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anoma
 
 ### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
 
-![Anomalia de Tempratura Máxima Mensal](Figuras/Acum_PRP_Jul_2024_Norte.png)
+![Anomalia de Tempratura Máxima Mensal](Figuras/anomalia_temperatura_maxima_jul.png)
 
 ### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
 
