@@ -17,9 +17,9 @@ O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anoma
 Antes de executar os scripts, você precisará instalar as seguintes bibliotecas Python:
 
 - numpy
-- pandas
+- geopandas
 - matplotlib
-- seaborn
+- pygrib
 - cartopy
 - xarray
 - netCDF4
