@@ -1,62 +1,62 @@
 # SAMET-CPTEC
 
-Este repositório contém scripts para a visualização dos dados de precipitação do produto SAMET do INPE/CPTEC. Este produto combina os dados observados com a reanálise ERA5, fazendo uma correção do campo de temperatura usando uma taxa de lapso estimada.
+Projeto de Valkiria Andrade para processamento e visualização meteorológica.
+Código organizado em pacote Python, com configuração pela linha de comando,
+testes de regressão e verificações automáticas no GitHub Actions.
 
-## Descrição
+## Instalação
 
-O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anomalia de temperatura utilizando o produto SAMET do CPTEC/INPE. 
+Python 3.10 ou superior. Na pasta deste repositório:
 
-## Estrutura do Repositório
+```bash
+python -m venv .venv
+# Windows PowerShell: .venv/Scripts/Activate.ps1
+# Linux/macOS: source .venv/bin/activate
+python -m pip install -e ".[dev]"
+```
 
-- `Scripts/`: Contém scripts utilizados para processar e analisar os dados.
-- `Dados/`: Contém os dados brutos e processados.
-- `Figuras/`: Contém figuras geradas a partir dos dados.
+WRF e MERGE precisam também de ecCodes: `python -m pip install -e ".[grib]"`.
+O pacote ecCodes oferece binários para Windows, Linux e macOS. NetCDF, cálculos e
+mapas não dependem desse extra. A leitura GRIB usa diretamente ecCodes, substituindo pygrib.
 
-## Pré-requisitos
+## Execução
 
-Antes de executar os scripts, você precisará instalar as seguintes bibliotecas Python:
+Exemplo (confira os nomes e metadados dos seus arquivos):
 
-- numpy
-- geopandas
-- matplotlib
-- pygrib
-- cartopy
-- xarray
-- netCDF4
-  
-## Imagens
+```bash
+samet-cptec --input "Dados/jul max" --climatology Dados/SAMeT_CPTEC_TMAX_mean_jul.nc --variable tmax --output output/tmax.png --netcdf output/tmax.nc
+samet-cptec --help
+```
 
-### Figura 1: Exemplo de Anomalia de Temperatura Mínima Mensal
+A anomalia é média dos arquivos diários menos climatologia; grades devem coincidir exatamente. --variable tmin ou tmax escolhe o campo; --region sul seleciona o Sul. Forneça dias do mesmo mês e climatologia correspondente, com unidades compatíveis. Ausências propagam por célula; o programa não completa dias faltantes nem comprova cobertura mensal a partir do nome dos arquivos.
 
-![Anomalia de Tempratura Mínima Mensal](Figuras/anomalia_temperatura_minima_jun.png)
+`--shapefile caminho/BR_UF_2022.shp` aplica máscara e limites locais; o arquivo
+deve incluir seus arquivos auxiliares e CRS. ZIPs precisam ser extraídos.
+Sem shapefile, Cartopy pode baixar a cartografia Natural Earth no primeiro uso.
+`--title` configura o título e `--verbose` mostra detalhes dos erros.
+Mapas são salvos sem abrir janelas. A pasta de saída é criada automaticamente.
 
-### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
+## Arquitetura e manutenção
 
-![Anomalia de Tempratura Máxima Mensal](Figuras/anomalia_temperatura_maxima_jul.png)
+- `src/samet_cptec/io.py`: leitura, fechamento de recursos e validação de grades.
+- `src/samet_cptec/cli.py`: argumentos e coordenação do processamento.
+- `src/samet_cptec/plotting.py`: renderização e máscara geográfica.
+- `Scripts/`: entradas com os nomes históricos, usando o pacote instalado.
+- `tests/`: dados sintéticos e regressões independentes de serviços externos.
+- `Dados/` e `Figuras/`: acervo original preservado.
 
-### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
+As entradas históricas agora exigem os mesmos argumentos da CLI. Caminhos,
+datas e arquivos antes fixos no código devem ser informados explicitamente.
+Paletas e resolução foram padronizadas; figuras não são cópias pixel a pixel
+das versões antigas. Valores ausentes não são convertidos em zero.
 
-![Anomalia de Tempratura Mínima Mensal - Sul](Figuras/anomalia_temperatura_minima_jul_Sul.png)
+```bash
+pytest -q
+ruff check src Scripts tests
+```
 
-## Como Utilizar
+A CI executa testes em Python 3.10 e 3.12. Os testes usam pequenos dados
+sintéticos e cartografia local; a interpretação científica e a cobertura do
+período devem ser conferidas com os dados operacionais.
 
-1. Clone este repositório:
-    ```bash
-    git clone https://github.com/valkiriaandrade/SAMET-CPTEC.git
-    ```
-
-2. Navegue até o diretório do projeto:
-    ```bash
-    cd SAMET-CPTEC
-    ```
-
-3. Execute os scripts conforme necessário.
-
-## Contribuições
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
-
-## Licença
-
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
+Histórico, descrição científica e imagens: [README original](docs/README-original.md).
