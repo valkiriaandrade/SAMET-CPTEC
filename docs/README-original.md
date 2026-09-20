@@ -28,15 +28,15 @@ Antes de executar os scripts, você precisará instalar as seguintes bibliotecas
 
 ### Figura 1: Exemplo de Anomalia de Temperatura Mínima Mensal
 
-![Anomalia de Tempratura Mínima Mensal](Figuras/anomalia_temperatura_minima_jun.png)
+![Anomalia de Tempratura Mínima Mensal](../Figuras/anomalia_temperatura_minima_jun.png)
 
 ### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
 
-![Anomalia de Tempratura Máxima Mensal](Figuras/anomalia_temperatura_maxima_jul.png)
+![Anomalia de Tempratura Máxima Mensal](../Figuras/anomalia_temperatura_maxima_jul.png)
 
 ### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
 
-![Anomalia de Tempratura Mínima Mensal - Sul](Figuras/anomalia_temperatura_minima_jul_Sul.png)
+![Anomalia de Tempratura Mínima Mensal - Sul](../Figuras/anomalia_temperatura_minima_jul_Sul.png)
 
 ## Como Utilizar
 
@@ -58,5 +58,5 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull re
 
 ## Licença
 
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](../LICENSE) para mais detalhes.
 
