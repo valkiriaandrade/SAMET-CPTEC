@@ -32,17 +32,41 @@
 Temperature*) is a daily gridded 2 m temperature analysis (maximum, minimum and mean) produced
 by [CPTEC/INPE](https://www.cptec.inpe.br/). It combines surface station observations with the
 ERA5 reanalysis, adjusted to the terrain with an estimated lapse rate, on a 0.05° (~5 km) grid
-over South America.
+over South America. **Anomalies are computed against the CPTEC monthly climatologies for the
+base period 2000–2023**, which is also stated in the credit on every map.
 
-The repository includes sample inputs in [`data/`](data/):
+*Data: CPTEC/INPE – SAMeT, https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/ (non-commercial use;
+see [LICENSE](LICENSE)).*
 
-| File / folder | Content |
-|---|---|
-| `tmax_daily_jul_2024/SAMeT_CPTEC_TMAX_202407DD.nc` | Daily maximum temperature, July 2024 |
-| `SAMeT_CPTEC_TMAX_mean_jul.nc` | July maximum-temperature climatology |
-| `tmax_daily_jun_2024/SAMeT_CPTEC_TMAX_202406DD.nc` | Daily maximum temperature, June 2024 |
-| `SAMeT_CPTEC_TMIN_mean_jun.nc` | June minimum-temperature climatology |
-| `BR_UF_2022.zip` | IBGE 2022 state boundaries (zipped shapefile) |
+| File / folder in `data/` | Content | In the repo? |
+|---|---|---|
+| `tmax_daily_jul_2024/SAMeT_CPTEC_TMAX_202407DD.nc` | Daily maximum temperature, July 2024 | committed sample |
+| `tmax_daily_jun_2024/SAMeT_CPTEC_TMAX_202406DD.nc` | Daily maximum temperature, June 2024 | committed sample |
+| `SAMeT_CPTEC_TMAX_mean_jul.nc`, `SAMeT_CPTEC_TMIN_mean_jun.nc` | July Tmax / June Tmin climatology (2000–2023) | committed |
+| `tmin_daily_jun_2024/`, `tmin_daily_jul_2024/` | Daily minimum temperature, June and July 2024 | `make data` |
+| `SAMeT_CPTEC_TMIN_mean_jul.nc` | July Tmin climatology (2000–2023) | `make data` |
+| `BR_UF_2022.zip` | IBGE 2022 state boundaries (zipped shapefile) | committed |
+
+## Get the data
+
+The raw files that are not committed are downloaded from the public CPTEC/INPE server:
+
+```bash
+make data                          # or: python scripts/download_data.py
+```
+
+This fetches exactly what the README examples and `make figures` need, and skips files that are
+already there. To download other periods:
+
+```bash
+python scripts/download_data.py --variable tmin tmax --months 2024-08 2024-09
+python scripts/download_data.py --dry-run        # only list the URLs
+```
+
+Each month brings its daily files (`DAILY/<VAR>/<YYYY>/<MM>/`) and the matching monthly
+climatology (`CLIMATOLOGY/MONTHLY_AVERAGE/<VAR>/`). Downloaded files are git-ignored. A file
+missing on the server is reported by name, and the script exits with an error after trying
+the rest.
 
 ## Install
 
@@ -59,6 +83,8 @@ python -m pip install -e ".[dev]"  # or: make install
 ## Quick start
 
 ```bash
+make data                          # fetch the raw files that are not committed
+
 # July 2024 maximum-temperature anomaly over Brazil (+ NetCDF of the field)
 samet-cptec --input data/tmax_daily_jul_2024 \
             --climatology data/SAMeT_CPTEC_TMAX_mean_jul.nc \
@@ -70,6 +96,9 @@ samet-cptec --input data/tmax_daily_jul_2024 \
             --climatology data/SAMeT_CPTEC_TMAX_mean_jul.nc \
             --variable tmax --region south --shapefile data/BR_UF_2022.zip \
             --output output/tmax_jul_2024_south.png
+
+# June 2024 minimum-temperature anomaly (needs `make data`)
+samet-cptec --input data/tmin_daily_jun_2024             --climatology data/SAMeT_CPTEC_TMIN_mean_jun.nc             --variable tmin --shapefile data/BR_UF_2022.zip             --output output/tmin_jun_2024.png
 
 # Rebuild every figure in figures/
 make figures                       # or: python scripts/make_figures.py
@@ -101,9 +130,10 @@ already set.
 
 ```
 SAMET-CPTEC/
-├── data/                  # sample SAMeT inputs and IBGE state boundaries
+├── data/                  # sample SAMeT inputs, IBGE boundaries; `make data` adds the rest
 ├── figures/               # published maps (rebuilt with `make figures`)
 ├── scripts/
+│   ├── download_data.py   # downloads raw data from CPTEC/INPE (`make data`)
 │   ├── make_figures.py    # regenerates every figure in figures/
 │   └── *.py               # shortcuts for the CLI
 ├── src/samet_cptec/
@@ -113,7 +143,7 @@ SAMET-CPTEC/
 │   ├── plotting.py        # shared map style and rendering
 │   ├── labels.py          # titles, periods and unit labels
 │   └── regions.py         # map domains and region aliases
-├── tests/                 # pytest suite (synthetic data, runs offline)
+├── tests/                 # pytest suite (synthetic data; network access is blocked)
 ├── docs/                  # validation notes and project history
 ├── Makefile
 └── pyproject.toml
@@ -125,15 +155,15 @@ SAMET-CPTEC/
 make install   # editable install with dev tools + pre-commit hooks (ruff)
 make test      # pytest with coverage report
 make lint      # ruff check + ruff format --check
+make data      # download the raw data from CPTEC/INPE (manual step, never run in CI)
 make figures   # regenerate every figure in figures/ from data/
 ```
 
 On Windows without `make`, run the commands from the [Makefile](Makefile) directly, e.g.
 `python -m pytest -q --cov` or `python scripts/make_figures.py`.
 
-The two minimum-temperature figures in the gallery come from daily TMIN files that are not
-included in this repository. `make figures` keeps those images as they are and regenerates the
-rest; see [docs/VALIDATION.md](docs/VALIDATION.md).
+Tests and CI never download anything: they use small synthetic files, and a test fixture
+blocks network access. `make data` is a manual step.
 
 ## License
 

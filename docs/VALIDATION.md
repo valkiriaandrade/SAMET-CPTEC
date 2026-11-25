@@ -23,3 +23,20 @@ by the user. Missing values propagate per grid cell.
   `figures/min_temperature_anomaly_jul_south.png` could not be regenerated: the daily
   minimum-temperature files (and, for July, the TMIN climatology) are not in the
   repository. The original images are kept under their new names.
+
+## Downloaded data and 2000–2023 climatologies (v0.3.0)
+
+- `scripts/download_data.py` (`make data`) downloads from the public CPTEC/INPE server
+  (https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/) the daily files and monthly
+  climatologies the figures need; downloaded files are git-ignored.
+- All maps now use the current CPTEC monthly climatologies (base period **2000–2023**).
+  The two older committed climatologies (`SAMeT_CPTEC_TMAX_mean_jul.nc`,
+  `SAMeT_CPTEC_TMIN_mean_jun.nc`) were replaced by the 2000–2023 versions (same grid;
+  differences up to ~0.4–0.5 °C at individual grid points, mean below 0.05 °C).
+- The daily Tmax files for 26–31 July 2024 first committed were **preliminary** versions;
+  CPTEC republished those days on 2–3 August 2024 (mean absolute difference ~0.6 °C,
+  locally up to 10–18 °C). They were replaced by the current server versions with
+  `python scripts/download_data.py --variable tmax --months 2024-07 --overwrite`
+  (the other 25 days and the climatology were already identical), and the July Tmax
+  figure was regenerated.
+- Maps are drawn with filled contours (`contourf`) as in the original scripts.

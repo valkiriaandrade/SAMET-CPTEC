@@ -1,0 +1,181 @@
+"""Download SAMeT data from the public CPTEC/INPE server into ``data/``.
+
+Source: https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/ (CPTEC/INPE). Daily files come from
+``DAILY/<VAR>/<YYYY>/<MM>/`` and monthly climatologies (base period 2000–2023) from
+``CLIMATOLOGY/MONTHLY_AVERAGE/<VAR>/``.
+
+Usage::
+
+    python scripts/download_data.py                     # everything `make figures` needs
+    python scripts/download_data.py --variable tmin --months 2024-08 2024-09
+    python scripts/download_data.py --dry-run           # only list the URLs
+
+Files that already exist are skipped (use ``--overwrite`` to fetch them again).
+"""
+
+from __future__ import annotations
+
+import argparse
+import calendar
+import logging
+import shutil
+import sys
+import time
+import urllib.error
+import urllib.request
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
+
+BASE_URL = "https://ftp.cptec.inpe.br/modelos/tempo/SAMeT"
+ROOT = Path(__file__).resolve().parents[1]
+USER_AGENT = "samet-cptec-data-download"
+#: (variable, month) pairs used by the figures in ``figures/`` and the README examples.
+FIGURE_DATA = [("tmax", "2024-07"), ("tmin", "2024-06"), ("tmin", "2024-07")]
+
+logger = logging.getLogger("download_data")
+
+
+class DownloadError(RuntimeError):
+    """A file could not be downloaded."""
+
+
+@dataclass(frozen=True)
+class Item:
+    """One file to download: source URL and destination relative to the data folder."""
+
+    url: str
+    path: Path
+
+
+def parse_month(value: str) -> date:
+    """Parse ``YYYY-MM`` (argparse type)."""
+    try:
+        year, month = map(int, value.split("-"))
+        return date(year, month, 1)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(f"invalid month {value!r}; use YYYY-MM") from error
+
+
+def plan(variable: str, month: date) -> list[Item]:
+    """Daily files of ``month`` plus the matching monthly climatology."""
+    var = variable.upper()
+    abbr = calendar.month_abbr[month.month].lower()
+    folder = Path(f"{variable}_daily_{abbr}_{month.year}")
+    days = calendar.monthrange(month.year, month.month)[1]
+    items = []
+    for day in range(1, days + 1):
+        name = f"SAMeT_CPTEC_{var}_{month:%Y%m}{day:02d}.nc"
+        url = f"{BASE_URL}/DAILY/{var}/{month:%Y/%m}/{name}"
+        items.append(Item(url, folder / name))
+    clim = f"SAMeT_CPTEC_{var}_mean_{abbr}.nc"
+    items.append(Item(f"{BASE_URL}/CLIMATOLOGY/MONTHLY_AVERAGE/{var}/{clim}", Path(clim)))
+    return items
+
+
+def fetch(
+    url: str,
+    dest: Path,
+    *,
+    overwrite: bool = False,
+    retries: int = 3,
+    timeout: float = 120,
+    opener: Callable = urllib.request.urlopen,
+) -> bool:
+    """Download ``url`` to ``dest``; return False if it was skipped because it exists.
+
+    The file is written to ``<dest>.part`` first and renamed when complete, so an
+    interrupted download never leaves a truncated file behind.
+
+    Raises:
+        DownloadError: if the file does not exist on the server or every attempt fails.
+    """
+    if dest.exists() and dest.stat().st_size > 0 and not overwrite:
+        logger.debug("Already present: %s", dest)
+        return False
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    partial = dest.with_name(dest.name + ".part")
+    last_error: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with opener(request, timeout=timeout) as response, partial.open("wb") as out:
+                shutil.copyfileobj(response, out)
+            partial.replace(dest)
+            return True
+        except urllib.error.HTTPError as error:
+            partial.unlink(missing_ok=True)
+            if error.code == 404:
+                raise DownloadError(
+                    f"Not found on the server: {url} (check the date; the file may not exist)"
+                ) from error
+            last_error = error
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            partial.unlink(missing_ok=True)
+            last_error = error
+        if attempt < retries:
+            time.sleep(2 * attempt)
+    raise DownloadError(f"Could not download {url} after {retries} attempts: {last_error}")
+
+
+def download(items: Iterable[Item], data_dir: Path, *, overwrite: bool = False) -> list[str]:
+    """Download every item; return the error messages of the ones that failed."""
+    errors, fetched, skipped = [], 0, 0
+    for item in items:
+        try:
+            if fetch(item.url, data_dir / item.path, overwrite=overwrite):
+                fetched += 1
+                logger.info("Downloaded %s", item.path)
+            else:
+                skipped += 1
+        except DownloadError as error:
+            errors.append(str(error))
+            logger.error("%s", error)
+    logger.info("%d downloaded, %d already present, %d failed", fetched, skipped, len(errors))
+    return errors
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Command-line options."""
+    parser = argparse.ArgumentParser(
+        description=__doc__.splitlines()[0],
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--variable", nargs="+", choices=["tmin", "tmax"], help="variables (default: figures)"
+    )
+    parser.add_argument(
+        "--months", nargs="+", type=parse_month, metavar="YYYY-MM", help="months to download"
+    )
+    parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
+    parser.add_argument("--overwrite", action="store_true", help="download existing files again")
+    parser.add_argument("--dry-run", action="store_true", help="only list the URLs")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Entry point; returns the process exit status."""
+    args = build_parser().parse_args(argv)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    if args.variable or args.months:
+        if not (args.variable and args.months):
+            logger.error("Pass both --variable and --months (or neither for the figure data)")
+            return 2
+        pairs = [(v, m) for v in args.variable for m in args.months]
+    else:
+        pairs = [(v, parse_month(m)) for v, m in FIGURE_DATA]
+    items = [item for variable, month in pairs for item in plan(variable, month)]
+    if args.dry_run:
+        for item in items:
+            print(f"{item.url} -> {args.data_dir / item.path}")
+        return 0
+    errors = download(items, args.data_dir, overwrite=args.overwrite)
+    if errors:
+        logger.error("%d file(s) could not be downloaded:\n  %s", len(errors), "\n  ".join(errors))
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
