@@ -45,12 +45,12 @@ Before running the scripts, you will need to install the following Python librar
 
 1. Clone this repository:
     ```bash
-    git clone https://github.com/valkiriaandrade/SAMET-CPTEC.git
+    git clone https://github.com/valkiriaandrade/samet-temperature-anomaly-maps.git
     ```
 
 2. Go to the project folder:
     ```bash
-    cd SAMET-CPTEC
+    cd samet-temperature-anomaly-maps
     ```
 
 3. Run the scripts as needed.
