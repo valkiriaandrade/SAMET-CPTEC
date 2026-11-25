@@ -42,6 +42,9 @@ The repository includes sample inputs in [`data/`](data/):
 | `SAMeT_CPTEC_TMAX_mean_jul.nc` | July maximum-temperature climatology |
 | `tmax_daily_jun_2024/SAMeT_CPTEC_TMAX_202406DD.nc` | Daily maximum temperature, June 2024 |
 | `SAMeT_CPTEC_TMIN_mean_jun.nc` | June minimum-temperature climatology |
+| `tmin_daily_jun_2024/SAMeT_CPTEC_TMIN_202406DD.nc` | Daily minimum temperature, June 2024 |
+| `tmin_daily_jul_2024/SAMeT_CPTEC_TMIN_202407DD.nc` | Daily minimum temperature, July 2024 |
+| `SAMeT_CPTEC_TMIN_mean_jul.nc` | July minimum-temperature climatology (2000–2023, downloaded Nov 2026) |
 | `BR_UF_2022.zip` | IBGE 2022 state boundaries (zipped shapefile) |
 
 ## Install
@@ -130,10 +133,6 @@ make figures   # regenerate every figure in figures/ from data/
 
 On Windows without `make`, run the commands from the [Makefile](Makefile) directly, e.g.
 `python -m pytest -q --cov` or `python scripts/make_figures.py`.
-
-The two minimum-temperature figures in the gallery come from daily TMIN files that are not
-included in this repository. `make figures` keeps those images as they are and regenerates the
-rest; see [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## License
 

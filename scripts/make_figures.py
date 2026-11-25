@@ -39,8 +39,6 @@ FIGURES = [
         "tmax_daily_jul_2024",
         "SAMeT_CPTEC_TMAX_mean_jul.nc",
     ),
-    # The daily minimum-temperature files behind these two figures are not in the
-    # repository, so they are skipped and the existing images are kept.
     Figure(
         "min_temperature_anomaly_jun.png",
         "tmin",
