@@ -9,7 +9,9 @@ from datetime import date
 from pathlib import Path
 
 PRODUCT = "SAMeT"
-SOURCE_CREDIT = "Data: CPTEC/INPE SAMeT"
+#: Base period of the CPTEC SAMeT monthly climatologies used for the anomalies.
+CLIMATOLOGY_PERIOD = "2000–2023"
+SOURCE_CREDIT = f"Data: CPTEC/INPE SAMeT · climatology {CLIMATOLOGY_PERIOD}"
 
 VARIABLE_NAMES: dict[str, str] = {
     "tmin": "minimum temperature",

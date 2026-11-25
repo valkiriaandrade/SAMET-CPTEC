@@ -64,6 +64,7 @@ def plot_map(
     extent: Sequence[float] | None = None,
     credit: str | None = None,
     dpi: int = DEFAULT_DPI,
+    extend: str = "both",
 ) -> None:
     """Draw a gridded field on a map and save it as PNG.
 
@@ -80,6 +81,7 @@ def plot_map(
         extent: ``[lon_min, lon_max, lat_min, lat_max]``; defaults to the data extent.
         credit: small source credit printed in the bottom-right corner.
         dpi: output resolution.
+        extend: colorbar/contour extension: ``"both"``, ``"max"``, ``"min"`` or ``"neither"``.
 
     Raises:
         ValueError: on inconsistent grids, bad shapefiles or an all-missing field.
@@ -123,13 +125,15 @@ def plot_map(
             )
             palette = plt.get_cmap(cmap)
             norm = BoundaryNorm(levels, palette.N)
-            artist = ax.pcolormesh(
+            # Smooth filled contours, as in the original scripts (no per-cell blocks).
+            artist = ax.contourf(
                 lon,
                 lat,
                 values,
+                levels=levels,
                 cmap=palette,
                 norm=norm,
-                shading="auto",
+                extend=extend,
                 transform=ccrs.PlateCarree(),
             )
             if borders is not None:
@@ -152,7 +156,7 @@ def plot_map(
             grid.right_labels = False
             grid.xlabel_style = grid.ylabel_style = {"size": STYLE["xtick.labelsize"]}
             fig.colorbar(
-                artist, ax=ax, label=label, ticks=levels, extend="both", shrink=0.85, pad=0.03
+                artist, ax=ax, label=label, ticks=levels, extend=extend, shrink=0.85, pad=0.03
             )
             ax.set_title(title, pad=10)
             if credit:

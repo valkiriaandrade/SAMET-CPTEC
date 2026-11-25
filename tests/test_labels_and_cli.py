@@ -105,3 +105,10 @@ def test_title_formatting():
         == "SAMeT minimum temperature anomaly – Southern Brazil, June 2024 (°C)"
     )
     assert format_title("tmin") == "SAMeT minimum temperature anomaly (°C)"
+
+
+def test_credit_mentions_climatology_base_period():
+    from samet_cptec.labels import CLIMATOLOGY_PERIOD, SOURCE_CREDIT
+
+    assert CLIMATOLOGY_PERIOD == "2000–2023"
+    assert "CPTEC/INPE" in SOURCE_CREDIT and CLIMATOLOGY_PERIOD in SOURCE_CREDIT
