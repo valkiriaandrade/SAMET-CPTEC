@@ -1,12 +1,14 @@
 # SAMET-CPTEC
 
-Projeto de Valkiria Andrade para processamento e visualização meteorológica.
-Código organizado em pacote Python, com configuração pela linha de comando,
-testes de regressão e verificações automáticas no GitHub Actions.
+Weather data processing and visualisation project by Valkiria Andrade.
+The code is organised as a Python package with a command-line interface,
+regression tests and automated checks on GitHub Actions.
 
-## Instalação
+<img src="Figuras/anomalia_temperatura_maxima_jul.png" alt="Maximum temperature anomaly map for Brazil, July 2024" width="480"/>
 
-Python 3.10 ou superior. Na pasta deste repositório:
+## Installation
+
+Python 3.10 or later. From this repository's folder:
 
 ```bash
 python -m venv .venv
@@ -15,48 +17,48 @@ python -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
-WRF e MERGE precisam também de ecCodes: `python -m pip install -e ".[grib]"`.
-O pacote ecCodes oferece binários para Windows, Linux e macOS. NetCDF, cálculos e
-mapas não dependem desse extra. A leitura GRIB usa diretamente ecCodes, substituindo pygrib.
+WRF and MERGE also need ecCodes: `python -m pip install -e ".[grib]"`.
+The ecCodes package ships binaries for Windows, Linux and macOS. NetCDF, calculations and
+maps do not depend on this extra. GRIB files are read directly with ecCodes, replacing pygrib.
 
-## Execução
+## Usage
 
-Exemplo (confira os nomes e metadados dos seus arquivos):
+Example (check your files' names and metadata):
 
 ```bash
 samet-cptec --input "Dados/jul max" --climatology Dados/SAMeT_CPTEC_TMAX_mean_jul.nc --variable tmax --output output/tmax.png --netcdf output/tmax.nc
 samet-cptec --help
 ```
 
-A anomalia é média dos arquivos diários menos climatologia; grades devem coincidir exatamente. --variable tmin ou tmax escolhe o campo; --region sul seleciona o Sul. Forneça dias do mesmo mês e climatologia correspondente, com unidades compatíveis. Ausências propagam por célula; o programa não completa dias faltantes nem comprova cobertura mensal a partir do nome dos arquivos.
+The anomaly is the mean of the daily files minus the climatology; grids must match exactly. `--variable tmin` or `tmax` selects the field; `--region sul` selects southern Brazil. Provide days from the same month and the matching climatology, with compatible units. Missing values propagate per cell; the program does not fill in missing days or infer monthly coverage from file names.
 
-`--shapefile caminho/BR_UF_2022.shp` aplica máscara e limites locais; o arquivo
-deve incluir seus arquivos auxiliares e CRS. ZIPs precisam ser extraídos.
-Sem shapefile, Cartopy pode baixar a cartografia Natural Earth no primeiro uso.
-`--title` configura o título e `--verbose` mostra detalhes dos erros.
-Mapas são salvos sem abrir janelas. A pasta de saída é criada automaticamente.
+`--shapefile path/BR_UF_2022.shp` applies a mask and local boundaries; the file
+must come with its auxiliary files and CRS. ZIP files must be extracted first.
+Without a shapefile, Cartopy may download Natural Earth cartography on first use.
+`--title` sets the title and `--verbose` shows error details.
+Maps are saved without opening windows. The output folder is created automatically.
 
-## Arquitetura e manutenção
+## Architecture and maintenance
 
-- `src/samet_cptec/io.py`: leitura, fechamento de recursos e validação de grades.
-- `src/samet_cptec/cli.py`: argumentos e coordenação do processamento.
-- `src/samet_cptec/plotting.py`: renderização e máscara geográfica.
-- `Scripts/`: entradas com os nomes históricos, usando o pacote instalado.
-- `tests/`: dados sintéticos e regressões independentes de serviços externos.
-- `Dados/` e `Figuras/`: acervo original preservado.
+- `src/samet_cptec/io.py`: reading, resource cleanup and grid validation.
+- `src/samet_cptec/cli.py`: arguments and processing coordination.
+- `src/samet_cptec/plotting.py`: rendering and geographic masking.
+- `Scripts/`: entry points with the historical names, using the installed package.
+- `tests/`: synthetic data and regression tests independent of external services.
+- `Dados/` and `Figuras/`: original data and figures, preserved.
 
-As entradas históricas agora exigem os mesmos argumentos da CLI. Caminhos,
-datas e arquivos antes fixos no código devem ser informados explicitamente.
-Paletas e resolução foram padronizadas; figuras não são cópias pixel a pixel
-das versões antigas. Valores ausentes não são convertidos em zero.
+The historical entry points now require the same arguments as the CLI. Paths,
+dates and files that used to be hard-coded must be passed explicitly.
+Palettes and resolution were standardised; figures are not pixel-perfect copies
+of the old versions. Missing values are not converted to zero.
 
 ```bash
 pytest -q
 ruff check src Scripts tests
 ```
 
-A CI executa testes em Python 3.10 e 3.12. Os testes usam pequenos dados
-sintéticos e cartografia local; a interpretação científica e a cobertura do
-período devem ser conferidas com os dados operacionais.
+CI runs the tests on Python 3.10 and 3.12. Tests use small synthetic data
+and local cartography; scientific interpretation and period coverage should be
+checked against operational data.
 
-Histórico, descrição científica e imagens: [README original](docs/README-original.md).
+History, scientific background and images: [original README (Portuguese)](docs/README-original.md).
