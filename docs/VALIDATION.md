@@ -33,9 +33,10 @@ by the user. Missing values propagate per grid cell.
   The two older committed climatologies (`SAMeT_CPTEC_TMAX_mean_jul.nc`,
   `SAMeT_CPTEC_TMIN_mean_jun.nc`) were replaced by the 2000–2023 versions (same grid;
   differences up to ~0.4–0.5 °C at individual grid points, mean below 0.05 °C).
-- The committed daily Tmax files for 26–31 July 2024 are **preliminary** versions:
+- The daily Tmax files for 26–31 July 2024 first committed were **preliminary** versions;
   CPTEC republished those days on 2–3 August 2024 (mean absolute difference ~0.6 °C,
-  locally up to 10–18 °C). They were kept unchanged (no data is modified); running
+  locally up to 10–18 °C). They were replaced by the current server versions with
   `python scripts/download_data.py --variable tmax --months 2024-07 --overwrite`
-  replaces them with the revised files.
+  (the other 25 days and the climatology were already identical), and the July Tmax
+  figure was regenerated.
 - Maps are drawn with filled contours (`contourf`) as in the original scripts.
