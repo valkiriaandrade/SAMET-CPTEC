@@ -1,20 +1,20 @@
 # SAMET-CPTEC
 
-Este repositório contém scripts para a visualização dos dados de precipitação do produto SAMET do INPE/CPTEC. Este produto combina os dados observados com a reanálise ERA5, fazendo uma correção do campo de temperatura usando uma taxa de lapso estimada.
+This repository contains scripts for visualising temperature data from INPE/CPTEC's SAMeT product. This product combines observed data with the ERA5 reanalysis, correcting the temperature field with an estimated lapse rate.
 
-## Descrição
+## Description
 
-O projeto SAMET-CPTEC visa no aprofundamento de visualização de dados de anomalia de temperatura utilizando o produto SAMET do CPTEC/INPE. 
+The SAMET-CPTEC project focuses on visualising temperature anomaly data using CPTEC/INPE's SAMeT product.
 
-## Estrutura do Repositório
+## Repository structure
 
-- `Scripts/`: Contém scripts utilizados para processar e analisar os dados.
-- `Dados/`: Contém os dados brutos e processados.
-- `Figuras/`: Contém figuras geradas a partir dos dados.
+- `Scripts/`: scripts used to process and analyse the data.
+- `Dados/`: raw and processed data.
+- `Figuras/`: figures generated from the data.
 
-## Pré-requisitos
+## Prerequisites
 
-Antes de executar os scripts, você precisará instalar as seguintes bibliotecas Python:
+Before running the scripts, you will need to install the following Python libraries:
 
 - numpy
 - geopandas
@@ -24,39 +24,38 @@ Antes de executar os scripts, você precisará instalar as seguintes bibliotecas
 - xarray
 - netCDF4
 
-## Imagens
+## Images
 
-### Figura 1: Exemplo de Anomalia de Temperatura Mínima Mensal
+### Figure 1: Example of a monthly minimum temperature anomaly
 
-![Anomalia de Tempratura Mínima Mensal](../Figuras/anomalia_temperatura_minima_jun.png)
+![Monthly minimum temperature anomaly](../Figuras/anomalia_temperatura_minima_jun.png)
 
-### Figura 2: Exemplo de Anomalia de Temperatura Máxima Mensal
+### Figure 2: Example of a monthly maximum temperature anomaly
 
-![Anomalia de Tempratura Máxima Mensal](../Figuras/anomalia_temperatura_maxima_jul.png)
+![Monthly maximum temperature anomaly](../Figuras/anomalia_temperatura_maxima_jul.png)
 
-### Figura 3: Exemplo de Anomalia de Temperatura Mínima Mensal- Sul
+### Figure 3: Example of a monthly minimum temperature anomaly - South
 
-![Anomalia de Tempratura Mínima Mensal - Sul](../Figuras/anomalia_temperatura_minima_jul_Sul.png)
+![Monthly minimum temperature anomaly - South](../Figuras/anomalia_temperatura_minima_jul_Sul.png)
 
-## Como Utilizar
+## How to use
 
-1. Clone este repositório:
+1. Clone this repository:
     ```bash
     git clone https://github.com/valkiriaandrade/SAMET-CPTEC.git
     ```
 
-2. Navegue até o diretório do projeto:
+2. Go to the project folder:
     ```bash
     cd SAMET-CPTEC
     ```
 
-3. Execute os scripts conforme necessário.
+3. Run the scripts as needed.
 
-## Contribuições
+## Contributing
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+Contributions are welcome! Feel free to open issues and pull requests.
 
-## Licença
+## License
 
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](../LICENSE) para mais detalhes.
-
+This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.
