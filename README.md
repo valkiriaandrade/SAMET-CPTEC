@@ -1,64 +1,146 @@
 # SAMET-CPTEC
 
-Weather data processing and visualisation project by Valkiria Andrade.
-The code is organised as a Python package with a command-line interface,
-regression tests and automated checks on GitHub Actions.
+**Monthly maximum and minimum temperature anomaly maps of Brazil from CPTEC/INPE SAMeT gridded observations, with one Python command.**
 
-<img src="Figuras/anomalia_temperatura_maxima_jul.png" alt="Maximum temperature anomaly map for Brazil, July 2024" width="480"/>
+[![CI](https://github.com/valkiriaandrade/SAMET-CPTEC/actions/workflows/tests.yml/badge.svg)](https://github.com/valkiriaandrade/SAMET-CPTEC/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-blue)
+[![License: MIT (code)](https://img.shields.io/badge/license-MIT%20(code)-green)](LICENSE)
 
-## Installation
+## Gallery
 
-Python 3.10 or later. From this repository's folder:
+| | |
+|:-:|:-:|
+| <img src="figures/max_temperature_anomaly_jul.png" alt="SAMeT maximum temperature anomaly over Brazil, July 2024" width="420"/> | <img src="figures/min_temperature_anomaly_jun.png" alt="SAMeT minimum temperature anomaly over Brazil, June 2024" width="420"/> |
+| Maximum temperature anomaly, Brazil, July 2024 | Minimum temperature anomaly, Brazil, June 2024 |
+| <img src="figures/min_temperature_anomaly_jul_south.png" alt="SAMeT minimum temperature anomaly over southern Brazil, July 2024" width="420"/> | |
+| Minimum temperature anomaly, southern Brazil (PR, SC, RS), July 2024 | |
+
+## What it does
+
+- Averages a month of daily SAMeT files (`tmax` or `tmin`) and subtracts the matching
+  monthly climatology to get the **monthly temperature anomaly** (°C).
+- Masks the field to Brazil or to the southern states (PR, SC, RS) with the IBGE state
+  boundaries, and draws a map with state borders, coastline, lat/lon labels, units and a
+  source credit.
+- Optionally saves the computed anomaly as NetCDF for further analysis.
+- Checks its inputs strictly: grids must match exactly, units metadata must agree, and
+  missing values are propagated per grid cell (never filled with zeros).
+
+## Data source
+
+[**SAMeT**](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/) (*South American Mapping of
+Temperature*) is a daily gridded 2 m temperature analysis (maximum, minimum and mean) produced
+by [CPTEC/INPE](https://www.cptec.inpe.br/). It combines surface station observations with the
+ERA5 reanalysis, adjusted to the terrain with an estimated lapse rate, on a 0.05° (~5 km) grid
+over South America.
+
+The repository includes sample inputs in [`data/`](data/):
+
+| File / folder | Content |
+|---|---|
+| `tmax_daily_jul_2024/SAMeT_CPTEC_TMAX_202407DD.nc` | Daily maximum temperature, July 2024 |
+| `SAMeT_CPTEC_TMAX_mean_jul.nc` | July maximum-temperature climatology |
+| `tmax_daily_jun_2024/SAMeT_CPTEC_TMAX_202406DD.nc` | Daily maximum temperature, June 2024 |
+| `SAMeT_CPTEC_TMIN_mean_jun.nc` | June minimum-temperature climatology |
+| `BR_UF_2022.zip` | IBGE 2022 state boundaries (zipped shapefile) |
+
+## Install
+
+Python 3.10 or later.
 
 ```bash
+git clone https://github.com/valkiriaandrade/SAMET-CPTEC.git
+cd SAMET-CPTEC
 python -m venv .venv
-# Windows PowerShell: .venv/Scripts/Activate.ps1
-# Linux/macOS: source .venv/bin/activate
-python -m pip install -e ".[dev]"
+source .venv/bin/activate          # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"  # or: make install
 ```
 
-WRF and MERGE also need ecCodes: `python -m pip install -e ".[grib]"`.
-The ecCodes package ships binaries for Windows, Linux and macOS. NetCDF, calculations and
-maps do not depend on this extra. GRIB files are read directly with ecCodes, replacing pygrib.
-
-## Usage
-
-Example (check your files' names and metadata):
+## Quick start
 
 ```bash
-samet-cptec --input "Dados/jul max" --climatology Dados/SAMeT_CPTEC_TMAX_mean_jul.nc --variable tmax --output output/tmax.png --netcdf output/tmax.nc
-samet-cptec --help
+# July 2024 maximum-temperature anomaly over Brazil (+ NetCDF of the field)
+samet-cptec --input data/tmax_daily_jul_2024 \
+            --climatology data/SAMeT_CPTEC_TMAX_mean_jul.nc \
+            --variable tmax --shapefile data/BR_UF_2022.zip \
+            --output output/tmax_jul_2024.png --netcdf output/tmax_jul_2024.nc
+
+# Same anomaly for southern Brazil only
+samet-cptec --input data/tmax_daily_jul_2024 \
+            --climatology data/SAMeT_CPTEC_TMAX_mean_jul.nc \
+            --variable tmax --region south --shapefile data/BR_UF_2022.zip \
+            --output output/tmax_jul_2024_south.png
+
+# Rebuild every figure in figures/
+make figures                       # or: python scripts/make_figures.py
 ```
 
-The anomaly is the mean of the daily files minus the climatology; grids must match exactly. `--variable tmin` or `tmax` selects the field; `--region sul` selects southern Brazil. Provide days from the same month and the matching climatology, with compatible units. Missing values propagate per cell; the program does not fill in missing days or infer monthly coverage from file names.
+## CLI options
 
-`--shapefile path/BR_UF_2022.shp` applies a mask and local boundaries; the file
-must come with its auxiliary files and CRS. ZIP files must be extracted first.
-Without a shapefile, Cartopy may download Natural Earth cartography on first use.
-`--title` sets the title and `--verbose` shows error details.
-Maps are saved without opening windows. The output folder is created automatically.
+`samet-cptec --help` prints the full list.
 
-## Architecture and maintenance
+| Option | Default | Description |
+|---|---|---|
+| `--input DIR` | *required* | Directory with daily SAMeT NetCDF files from one month |
+| `--climatology FILE` | *required* | Climatology NetCDF for the same month and variable |
+| `--output FILE` | *required* | Output PNG path (folders are created) |
+| `--variable {tmin,tmax}` | `tmin` | Temperature variable |
+| `--region {brazil,south}` | `brazil` | Map domain; the Portuguese aliases `brasil` and `sul` are also accepted |
+| `--shapefile FILE` | – | State boundaries with a CRS, as `.shp` or zipped (e.g. `data/BR_UF_2022.zip`), for masking and borders; without it, Natural Earth borders are used (downloaded on first use) |
+| `--period TEXT` | from file names | Period shown in the title, e.g. `"July 2024"` |
+| `--title TEXT` | built from the data | Custom map title |
+| `--netcdf FILE` | – | Also save the anomaly field as NetCDF |
+| `--dpi N` | `200` | PNG resolution |
+| `--verbose` | off | Debug logging and full tracebacks |
 
-- `src/samet_cptec/io.py`: reading, resource cleanup and grid validation.
-- `src/samet_cptec/cli.py`: arguments and processing coordination.
-- `src/samet_cptec/plotting.py`: rendering and geographic masking.
-- `Scripts/`: entry points with the historical names, using the installed package.
-- `tests/`: synthetic data and regression tests independent of external services.
-- `Dados/` and `Figuras/`: original data and figures, preserved.
+The shortcut scripts `scripts/max_temperature.py`, `scripts/min_temperature.py` and
+`scripts/min_temperature_south.py` call the same CLI with `--variable` (and `--region`)
+already set.
 
-The historical entry points now require the same arguments as the CLI. Paths,
-dates and files that used to be hard-coded must be passed explicitly.
-Palettes and resolution were standardised; figures are not pixel-perfect copies
-of the old versions. Missing values are not converted to zero.
+## Project structure
+
+```
+SAMET-CPTEC/
+├── data/                  # sample SAMeT inputs and IBGE state boundaries
+├── figures/               # published maps (rebuilt with `make figures`)
+├── scripts/
+│   ├── make_figures.py    # regenerates every figure in figures/
+│   └── *.py               # shortcuts for the CLI
+├── src/samet_cptec/
+│   ├── cli.py             # command-line interface
+│   ├── processing.py      # monthly mean minus climatology
+│   ├── io.py              # NetCDF reading and grid checks
+│   ├── plotting.py        # shared map style and rendering
+│   ├── labels.py          # titles, periods and unit labels
+│   └── regions.py         # map domains and region aliases
+├── tests/                 # pytest suite (synthetic data, runs offline)
+├── docs/                  # validation notes and project history
+├── Makefile
+└── pyproject.toml
+```
+
+## Development
 
 ```bash
-pytest -q
-ruff check src Scripts tests
+make install   # editable install with dev tools + pre-commit hooks (ruff)
+make test      # pytest with coverage report
+make lint      # ruff check + ruff format --check
+make figures   # regenerate every figure in figures/ from data/
 ```
 
-CI runs the tests on Python 3.10 and 3.12. Tests use small synthetic data
-and local cartography; scientific interpretation and period coverage should be
-checked against operational data.
+On Windows without `make`, run the commands from the [Makefile](Makefile) directly, e.g.
+`python -m pytest -q --cov` or `python scripts/make_figures.py`.
 
-History, scientific background and images: [original README](docs/README-original.md).
+The two minimum-temperature figures in the gallery come from daily TMIN files that are not
+included in this repository. `make figures` keeps those images as they are and regenerates the
+rest; see [docs/VALIDATION.md](docs/VALIDATION.md).
+
+## License
+
+Code: [MIT](LICENSE) © Valkiria Andrade.
+SAMeT data: CPTEC/INPE, non-commercial use only; see [LICENSE](LICENSE) and the
+[SAMeT read-me](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/Read-me.pdf).
+
+---
+
+Project history: [original README](docs/README-original.md).

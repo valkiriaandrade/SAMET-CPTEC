@@ -1,35 +1,79 @@
+"""``samet-cptec`` command: monthly temperature anomaly maps."""
+
+from __future__ import annotations
+
+import argparse
+import logging
+from collections.abc import Sequence
+
 import numpy as np
 
-from .arguments import execute, parser
+from .arguments import build_parser, execute
 from .io import files_in, save_netcdf
+from .labels import SOURCE_CREDIT, dates_from_names, format_period, format_title, units_label
 from .plotting import plot_map
 from .processing import monthly_anomaly
+from .regions import ALIASES, REGIONS, normalize_region
+
+logger = logging.getLogger(__name__)
+
+LEVELS = np.arange(-3, 3.5, 0.5)
+CMAP = "coolwarm"
 
 
-def run(args):
-    field = monthly_anomaly(files_in(args.input, ".nc"), args.climatology, args.variable)
+def run(args: argparse.Namespace) -> None:
+    """Compute the anomaly described by ``args`` and draw the map."""
+    files = files_in(args.input, ".nc")
+    logger.info("Averaging %d daily %s files from %s", len(files), args.variable, args.input)
+    field = monthly_anomaly(files, args.climatology, args.variable)
     if args.netcdf:
         save_netcdf(field, args.netcdf)
+        logger.info("Anomaly field written to %s", args.netcdf)
+    region = REGIONS[args.region]
+    period = args.period or format_period(dates_from_names(files))
+    units = units_label(field.attrs.get("units"))
     plot_map(
         field.values,
         field.lat,
         field.lon,
         args.output,
-        title=args.title or f"Anomalia média {args.variable}",
-        label="Anomalia (°C)",
-        levels=np.arange(-3, 3.5, 0.5),
-        cmap="coolwarm",
+        title=args.title or format_title(args.variable, period, region.label, units),
+        label=f"Temperature anomaly ({units})",
+        levels=LEVELS,
+        cmap=CMAP,
         shapefile=args.shapefile,
-        states=["PR", "SC", "RS"] if args.region == "sul" else None,
-        extent=[-57.6, -48, -33.75, -22.5] if args.region == "sul" else [-75, -34, -35, 7],
+        states=list(region.states) if region.states else None,
+        extent=list(region.extent),
+        credit=SOURCE_CREDIT,
+        dpi=args.dpi,
     )
 
 
-def main(argv=None):
-    p = parser("Anomalia mensal SAMET; use arquivos do mesmo mês e unidade da climatologia")
-    p.add_argument("--input", required=True, help="Diretório de arquivos diários NetCDF")
-    p.add_argument("--climatology", required=True)
-    p.add_argument("--variable", choices=["tmin", "tmax"], default="tmin")
-    p.add_argument("--region", choices=["brasil", "sul"], default="brasil")
-    p.add_argument("--netcdf", help="Salvar também o campo calculado")
-    execute(p, run, argv)
+def build_cli() -> argparse.ArgumentParser:
+    """Return the parser for the ``samet-cptec`` command."""
+    parser = build_parser(
+        "SAMeT monthly temperature anomaly: mean of the daily files minus the climatology. "
+        "Use daily files from a single month, with the same units as the climatology."
+    )
+    parser.add_argument("--input", required=True, help="directory with daily NetCDF files")
+    parser.add_argument(
+        "--climatology", required=True, help="NetCDF climatology for the same month"
+    )
+    parser.add_argument("--variable", choices=["tmin", "tmax"], default="tmin")
+    parser.add_argument(
+        "--region",
+        type=normalize_region,
+        choices=list(REGIONS),
+        default="brazil",
+        help=f"map domain (Portuguese aliases accepted: {', '.join(ALIASES)})",
+    )
+    parser.add_argument(
+        "--period", help='period shown in the title, e.g. "July 2024" (default: from file names)'
+    )
+    parser.add_argument("--netcdf", help="also save the computed anomaly field to this file")
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    """Entry point of the ``samet-cptec`` command."""
+    execute(build_cli(), run, argv)

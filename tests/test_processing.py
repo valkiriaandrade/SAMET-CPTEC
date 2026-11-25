@@ -24,5 +24,5 @@ def test_anomaly_and_missing_data(tmp_path, variable):
 
 
 def test_no_days():
-    with pytest.raises(ValueError, match="Nenhum"):
+    with pytest.raises(ValueError, match="No daily files"):
         monthly_anomaly([], "unused", "tmin")
