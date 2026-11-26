@@ -79,6 +79,9 @@ def run(args: argparse.Namespace) -> None:
         label=f"Temperature anomaly ({units})",
         levels=LEVELS,
         cmap=CMAP,
+        # Areas beyond ±3 °C get their own shades, as in the original scripts
+        # (contourf with extend="both"), not the colours of the end classes.
+        extend_colours=True,
         shapefile=args.shapefile,
         states=list(region.states) if region.states else None,
         extent=list(region.extent),

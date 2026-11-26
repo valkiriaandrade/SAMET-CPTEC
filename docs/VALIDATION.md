@@ -53,3 +53,10 @@ by the user. Missing values propagate per grid cell.
 - Climatology period: 2000–2023 according to CPTEC's `CLIMATOLOGY/READ-ME.txt` (now linked);
   the product read-me still says 2000–2020.
 - After these fixes `make figures` rebuilt the three figures byte-identical.
+- Colours beyond ±3 °C (approved change): since the English refactor, `BoundaryNorm` without
+  `extend` gave the areas above 3 °C and below −3 °C the same colour as the 2.5–3 and −3 to
+  −2.5 classes. The original scripts (`contourf(..., cmap="coolwarm", extend="both")`) gave
+  them their own shades; `plot_map` now does the same (`extend_colours`, as in the other three
+  map repositories). Palette and levels are unchanged. The three figures were regenerated: the
+  areas beyond ±3 °C and the colorbar arrows are now the darkest red and blue, and the inner
+  classes are spread over the rest of the palette.

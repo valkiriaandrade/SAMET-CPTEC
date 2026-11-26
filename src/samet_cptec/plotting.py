@@ -65,6 +65,7 @@ def plot_map(
     credit: str | None = None,
     dpi: int = DEFAULT_DPI,
     extend: str = "both",
+    extend_colours: bool = False,
 ) -> None:
     """Draw a gridded field on a map and save it as PNG.
 
@@ -82,6 +83,8 @@ def plot_map(
         credit: small source credit printed in the bottom-right corner.
         dpi: output resolution.
         extend: colorbar/contour extension: ``"both"``, ``"max"``, ``"min"`` or ``"neither"``.
+        extend_colours: reserve distinct colours of ``cmap`` for the out-of-range
+            arrows, as ``contourf(..., extend=...)`` does.
 
     Raises:
         ValueError: on inconsistent grids, bad shapefiles or an all-missing field.
@@ -123,7 +126,7 @@ def plot_map(
             crs=ccrs.PlateCarree(),
         )
         palette = mpl.colormaps[cmap] if isinstance(cmap, str) else cmap
-        norm = BoundaryNorm(levels, palette.N)
+        norm = BoundaryNorm(levels, palette.N, extend=extend if extend_colours else "neither")
         # Smooth filled contours, as in the original scripts (no per-cell blocks).
         artist = ax.contourf(
             lon,
