@@ -60,3 +60,9 @@ by the user. Missing values propagate per grid cell.
   map repositories). Palette and levels are unchanged. The three figures were regenerated: the
   areas beyond ±3 °C and the colorbar arrows are now the darkest red and blue, and the inner
   classes are spread over the rest of the palette.
+- New tests run `samet-cptec` end to end on small files laid out like the SAMeT ones (time
+  dimension, `_FillValue` −999e6, a `nobs` variable, no units): the monthly mean minus the
+  climatology with a missing value propagated, the `--netcdf` output, the whole-month,
+  climatology-month and units checks, the PR/SC/RS mask with known inside and outside points,
+  the separate colours beyond ±3 °C and `make figures` skips and failures. Coverage, now with
+  `scripts/` and branches: 84%.

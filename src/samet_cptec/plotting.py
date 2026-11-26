@@ -49,6 +49,22 @@ def _read_borders(shapefile: str | Path, states: Sequence[str] | None):
     return borders
 
 
+def mask_to_borders(
+    values: Any, lat: Any, lon: Any, shapefile: str | Path, states: Sequence[str] | None = None
+) -> np.ndarray:
+    """``values`` with NaN outside the shapefile polygons (only ``states``, if given).
+
+    ``lat``/``lon`` must have the shape of ``values``; longitudes may be in 0–360.
+    """
+    from shapely import intersects_xy
+    from shapely.ops import unary_union
+
+    borders = _read_borders(shapefile, states)
+    lon = (np.asarray(lon) + 180) % 360 - 180
+    inside = intersects_xy(unary_union(borders.geometry), lon, np.asarray(lat))
+    return np.where(inside, np.asarray(values, dtype=float), np.nan)
+
+
 def plot_map(
     values: Any,
     lat: Any,
@@ -109,11 +125,8 @@ def plot_map(
         )
     borders = None
     if shapefile:
-        from shapely import intersects_xy
-        from shapely.ops import unary_union
-
         borders = _read_borders(shapefile, states)
-        values = np.where(intersects_xy(unary_union(borders.geometry), lon, lat), values, np.nan)
+        values = mask_to_borders(values, lat, lon, shapefile, states)
     if not np.isfinite(values).any():
         raise ValueError("No valid data inside the selected area; check region and inputs")
     output = Path(output)
