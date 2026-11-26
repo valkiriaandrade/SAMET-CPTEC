@@ -33,10 +33,12 @@ Temperature*) is a daily gridded 2 m temperature analysis (maximum, minimum and 
 by [CPTEC/INPE](https://www.cptec.inpe.br/). It combines surface station observations with the
 ERA5 reanalysis, adjusted to the terrain with an estimated lapse rate, on a 0.05° (~5 km) grid
 over South America. **Anomalies are computed against the CPTEC monthly climatologies for the
-base period 2000–2023**, which is also stated in the credit on every map.
+base period 2000–2023** ([climatology read-me](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/CLIMATOLOGY/READ-ME.txt); the older
+[product read-me](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/Read-me.pdf) still says 2000–2020), which is also stated in the credit
+on every map.
 
 *Data: CPTEC/INPE – SAMeT, https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/ (non-commercial use;
-see [LICENSE](LICENSE)).*
+see [DATA_LICENSE.md](DATA_LICENSE.md)). State boundaries: IBGE, Malha Territorial 2022.*
 
 | File / folder in `data/` | Content | In the repo? |
 |---|---|---|
@@ -56,7 +58,8 @@ make data                          # or: python scripts/download_data.py
 ```
 
 This fetches exactly what the README examples and `make figures` need, and skips files that are
-already there. To download other periods:
+already there. CPTEC revises recent daily files a few days after release (the 26–31 July 2024
+Tmax files were replaced this way); `--overwrite` downloads existing files again. To download other periods:
 
 ```bash
 python scripts/download_data.py --variable tmin tmax --months 2024-08 2024-09
@@ -98,7 +101,10 @@ samet-cptec --input data/tmax_daily_jul_2024 \
             --output output/tmax_jul_2024_south.png
 
 # June 2024 minimum-temperature anomaly (needs `make data`)
-samet-cptec --input data/tmin_daily_jun_2024             --climatology data/SAMeT_CPTEC_TMIN_mean_jun.nc             --variable tmin --shapefile data/BR_UF_2022.zip             --output output/tmin_jun_2024.png
+samet-cptec --input data/tmin_daily_jun_2024 \
+            --climatology data/SAMeT_CPTEC_TMIN_mean_jun.nc \
+            --variable tmin --shapefile data/BR_UF_2022.zip \
+            --output output/tmin_jun_2024.png
 
 # Rebuild every figure in figures/
 make figures                       # or: python scripts/make_figures.py
@@ -114,7 +120,7 @@ make figures                       # or: python scripts/make_figures.py
 | `--climatology FILE` | *required* | Climatology NetCDF for the same month and variable |
 | `--output FILE` | *required* | Output PNG path (folders are created) |
 | `--variable {tmin,tmax}` | `tmin` | Temperature variable |
-| `--region {brazil,south}` | `brazil` | Map domain; the Portuguese aliases `brasil` and `sul` are also accepted |
+| `--region {brazil,south}` | `brazil` | Map domain; the Portuguese aliases `brasil` and `sul` are also accepted. The field is masked to Brazil, or to PR/SC/RS, only with `--shapefile`; otherwise the whole box is drawn |
 | `--shapefile FILE` | – | State boundaries with a CRS, as `.shp` or zipped (e.g. `data/BR_UF_2022.zip`), for masking and borders; without it, Natural Earth borders are used (downloaded on first use) |
 | `--period TEXT` | from file names | Period shown in the title, e.g. `"July 2024"` |
 | `--title TEXT` | built from the data | Custom map title |
@@ -129,7 +135,7 @@ already set.
 ## Project structure
 
 ```
-SAMET-CPTEC/
+samet-temperature-anomaly-maps/
 ├── data/                  # sample SAMeT inputs, IBGE boundaries; `make data` adds the rest
 ├── figures/               # published maps (rebuilt with `make figures`)
 ├── scripts/
@@ -145,6 +151,7 @@ SAMET-CPTEC/
 │   └── regions.py         # map domains and region aliases
 ├── tests/                 # pytest suite (synthetic data; network access is blocked)
 ├── docs/                  # validation notes and project history
+├── DATA_LICENSE.md        # terms of the SAMeT, IBGE and Natural Earth data
 ├── Makefile
 └── pyproject.toml
 ```
@@ -168,8 +175,8 @@ blocks network access. `make data` is a manual step.
 ## License
 
 Code: [MIT](LICENSE) © Valkiria Andrade.
-SAMeT data: CPTEC/INPE, non-commercial use only; see [LICENSE](LICENSE) and the
-[SAMeT read-me](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/Read-me.pdf).
+SAMeT data: CPTEC/INPE, non-commercial use only; IBGE state boundaries; Natural Earth
+borders. See [DATA_LICENSE.md](DATA_LICENSE.md) and the [SAMeT read-me](https://ftp.cptec.inpe.br/modelos/tempo/SAMeT/Read-me.pdf).
 
 ---
 
