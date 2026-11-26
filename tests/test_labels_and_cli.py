@@ -89,7 +89,10 @@ def test_period_from_provider_file_names():
     names = [f"SAMeT_CPTEC_TMAX_202407{day:02d}.nc" for day in (1, 15, 31)]
     dates = dates_from_names(names)
     assert dates[0] == date(2024, 7, 1)
-    assert format_period(dates) == "July 2024"
+    # three days of July are not "July 2024" (I2 of the code review)
+    assert format_period(dates) == "01 Jul 2024 to 31 Jul 2024"
+    whole = [f"SAMeT_CPTEC_TMAX_202407{day:02d}.nc" for day in range(1, 32)]
+    assert format_period(dates_from_names(whole)) == "July 2024"
     assert format_period([date(2024, 6, 30), date(2024, 7, 2)]) == "30 Jun 2024 to 02 Jul 2024"
     assert format_period([]) is None
     assert dates_from_names(["climatology.nc"]) == []

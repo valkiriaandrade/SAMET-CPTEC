@@ -1,4 +1,5 @@
-import importlib
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -38,9 +39,10 @@ def test_mismatched_coordinates_rejected():
         align_exact(a, b)
 
 
-def test_import_has_no_output(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    importlib.import_module("samet_cptec.cli")
+def test_import_has_no_output(tmp_path):
+    # A fresh interpreter: in this test session the package is already imported.
+    code = "import samet_cptec.cli, samet_cptec.plotting, sys; sys.exit('matplotlib.pyplot' in sys.modules)"
+    subprocess.run([sys.executable, "-c", code], cwd=tmp_path, check=True)
     assert not list(tmp_path.iterdir())
 
 
