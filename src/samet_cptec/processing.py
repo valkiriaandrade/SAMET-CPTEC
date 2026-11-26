@@ -8,6 +8,7 @@ from pathlib import Path
 import xarray as xr
 
 from .io import align_exact, read_field, spatial
+from .labels import TEMPERATURE_UNITS, units_label
 
 
 def monthly_anomaly(
@@ -16,14 +17,20 @@ def monthly_anomaly(
     """Mean of the daily ``files`` minus the ``climatology`` field.
 
     Files are accumulated one at a time, so the whole month is never held in memory.
-    Grids must match the climatology exactly and units metadata must agree.
+    Grids must match the climatology exactly and units metadata must agree. SAMeT files
+    carry no ``units`` attribute and are in °C; a file that declares units must use °C
+    or K.
 
     Raises:
-        ValueError: if no files are given, grids differ or units disagree.
+        ValueError: if no files are given, grids differ or units disagree or are not
+            temperatures.
     """
     if not files:
         raise ValueError("No daily files given; pass a directory with daily NetCDF files")
     reference = spatial(read_field(climatology, variable))
+    declared = reference.attrs.get("units")
+    if declared is not None and units_label(declared) not in TEMPERATURE_UNITS:
+        raise ValueError(f"Climatology {climatology} is in {declared!r}; expected °C or K")
     total = None
     for path in files:
         daily = spatial(read_field(path, variable))
@@ -37,7 +44,8 @@ def monthly_anomaly(
     result = total / len(files) - reference
     result.name = "temperature_anomaly"
     result.attrs = {
-        "units": "degC",
+        # an anomaly in K equals the anomaly in °C; keep the unit the files declare
+        "units": TEMPERATURE_UNITS.get(units_label(declared), "degC"),
         "source_file_count": len(files),
         "missing_data_policy": "propagate",
         "variable": variable,

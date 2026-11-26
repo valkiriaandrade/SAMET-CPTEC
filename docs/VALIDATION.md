@@ -40,3 +40,16 @@ by the user. Missing values propagate per grid cell.
   (the other 25 days and the climatology were already identical), and the July Tmax
   figure was regenerated.
 - Maps are drawn with filled contours (`contourf`) as in the original scripts.
+
+## Code review fixes (v0.3.0, 2026-11-26)
+
+- The `samet-cptec` command refuses daily files that are not one whole month
+  (`--allow-partial` overrides; the title then gives the dates) and a climatology of another
+  month (read from its `_jul`/`_jun` file name). Before, a partial month was averaged and
+  titled as the whole month. `make figures` skips an incomplete folder and asks for
+  `make data`, as in the MERGE repository.
+- Units: SAMeT files carry no `units` attribute and are in °C. A file that declares units
+  must use °C or K, and the daily files must agree with the climatology.
+- Climatology period: 2000–2023 according to CPTEC's `CLIMATOLOGY/READ-ME.txt` (now linked);
+  the product read-me still says 2000–2020.
+- After these fixes `make figures` rebuilt the three figures byte-identical.

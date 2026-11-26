@@ -19,8 +19,11 @@
 
 - Averages a month of daily SAMeT files (`tmax` or `tmin`) and subtracts the matching
   monthly climatology to get the **monthly temperature anomaly** (°C).
-- Masks the field to Brazil or to the southern states (PR, SC, RS) with the IBGE state
-  boundaries, and draws a map with state borders, coastline, lat/lon labels, units and a
+- Checks the period: the daily files must be every day of one month, and the climatology the
+  same month (`--allow-partial` overrides the first check; a partial month is then titled
+  with its dates, never as the whole month).
+- With `--shapefile`, masks the field to Brazil or to the southern states (PR, SC, RS) with the
+  IBGE state boundaries, and draws a map with state borders, coastline, lat/lon labels, units and a
   source credit.
 - Optionally saves the computed anomaly as NetCDF for further analysis.
 - Checks its inputs strictly: grids must match exactly, units metadata must agree, and
@@ -125,6 +128,7 @@ make figures                       # or: python scripts/make_figures.py
 | `--period TEXT` | from file names | Period shown in the title, e.g. `"July 2024"` |
 | `--title TEXT` | built from the data | Custom map title |
 | `--netcdf FILE` | – | Also save the anomaly field as NetCDF |
+| `--allow-partial` | off | Compute the anomaly even if the daily files are not one whole month |
 | `--dpi N` | `200` | PNG resolution |
 | `--verbose` | off | Debug logging and full tracebacks |
 

@@ -3,14 +3,24 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 import logging
 from collections.abc import Sequence
+from pathlib import Path
 
 import numpy as np
 
 from .arguments import build_parser, execute
 from .io import files_in, save_netcdf
-from .labels import SOURCE_CREDIT, dates_from_names, format_period, format_title, units_label
+from .labels import (
+    SOURCE_CREDIT,
+    dates_from_names,
+    format_period,
+    format_title,
+    month_coverage_problem,
+    month_from_name,
+    units_label,
+)
 from .plotting import plot_map
 from .processing import monthly_anomaly
 from .regions import ALIASES, REGIONS, normalize_region
@@ -21,10 +31,38 @@ LEVELS = np.arange(-3, 3.5, 0.5)
 CMAP = "coolwarm"
 
 
+def check_month(files: list[Path], climatology: str | Path, allow_partial: bool) -> None:
+    """Check that ``files`` are the days of one whole month, the month of ``climatology``.
+
+    Raises:
+        ValueError: on a partial month (unless ``allow_partial``) or another month's
+            climatology.
+    """
+    dates = dates_from_names(files)
+    problem = month_coverage_problem(dates)
+    if problem and not allow_partial:
+        raise ValueError(
+            f"{problem}; a monthly anomaly needs every day of the month "
+            "(run `make data`, or pass --allow-partial to compute it anyway)"
+        )
+    if problem:
+        logger.warning("Not a whole month: %s", problem)
+    expected = month_from_name(climatology)
+    months = sorted({calendar.month_name[d.month] for d in dates})
+    if expected is None:
+        logger.warning("Cannot tell the month of %s from its name; not checked", climatology)
+    elif dates and months != [expected]:
+        raise ValueError(
+            f"The daily files are from {' and '.join(months)} but the climatology "
+            f"{Path(climatology).name} is for {expected}"
+        )
+
+
 def run(args: argparse.Namespace) -> None:
     """Compute the anomaly described by ``args`` and draw the map."""
     files = files_in(args.input, ".nc")
     logger.info("Averaging %d daily %s files from %s", len(files), args.variable, args.input)
+    check_month(files, args.climatology, args.allow_partial)
     field = monthly_anomaly(files, args.climatology, args.variable)
     if args.netcdf:
         save_netcdf(field, args.netcdf)
@@ -71,6 +109,11 @@ def build_cli() -> argparse.ArgumentParser:
         "--period", help='period shown in the title, e.g. "July 2024" (default: from file names)'
     )
     parser.add_argument("--netcdf", help="also save the computed anomaly field to this file")
+    parser.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="compute the anomaly even if the daily files are not one whole month",
+    )
     return parser
 
 
