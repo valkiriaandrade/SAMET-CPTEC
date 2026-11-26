@@ -67,9 +67,9 @@ python scripts/download_data.py --dry-run        # only list the URLs
 ```
 
 Each month brings its daily files (`DAILY/<VAR>/<YYYY>/<MM>/`) and the matching monthly
-climatology (`CLIMATOLOGY/MONTHLY_AVERAGE/<VAR>/`). Downloaded files are git-ignored. A file
-missing on the server is reported by name, and the script exits with an error after trying
-the rest.
+climatology (`CLIMATOLOGY/MONTHLY_AVERAGE/<VAR>/`). Downloaded files are git-ignored. A download
+cut off midway is retried, never saved under its final name. A file missing on the server is
+reported by name, and the script exits with an error after trying the rest.
 
 ## Install
 
